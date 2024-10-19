@@ -1,0 +1,39 @@
+# Node modules directory
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variable files
+.env
+
+# Database files (if any local databases)
+*.sqlite
+*.sqlite3
+
+# Build artifacts
+dist/
+build/
+
+# Temp files and folders
+tmp/
+temp/
+*.tmp
+
+# Operating system files (macOS)
+.DS_Store
+
+# IDE/Editor config files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Security and dependency checking files
+.nyc_output/
+coverage/
+
