@@ -43,6 +43,11 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
     }
 });
 
+// A protected route to test authentication
+app.get('/api/protected', protect, (req, res) => {
+    res.json({ message: `Hello ${req.user.name}, you are authenticated!` });
+});
+
 // Route setup
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
