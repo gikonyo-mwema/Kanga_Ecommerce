@@ -5,6 +5,7 @@ import productRoutes from './routes/productRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import authRoutes from './routes/authRoutes.js'; // Import auth routes
+import cartRoutes from './routes/cartRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import multer from 'multer'; // Import multer for handling file uploads
 import cloudinary from 'cloudinary'; // Import Cloudinary
@@ -53,6 +54,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/auth', authRoutes); // Add authentication routes
+app.use('/api/cart', cartRoutes); // Add cart routes
 
 // Protecting a specific route (example of admin dashboard)
 app.use('/api/admin', protect, admin, (req, res) => {
