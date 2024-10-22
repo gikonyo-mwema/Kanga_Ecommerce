@@ -1,4 +1,3 @@
-
 import User from '../models/User.js'; // Ensure .js extension is included
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -19,12 +18,15 @@ export const register = async (req, res) => {
     const newUser = new User({
       email,
       password: hashedPassword, // Use hashed password
-      role: 'user'
+      isAdmin: false // Default role set to user
     });
 
     // Save user to the database
     await newUser.save();
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({
+      message: 'User registered successfully',
+      user: { email: newUser.email, role: newUser.role } // Optionally include user info
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -48,12 +50,15 @@ export const login = async (req, res) => {
 
     // Generate JWT
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      { userId: user._id, role: user.isAdmin ? 'admin' : 'user' }, // Use user.isAdmin for role
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    res.status(200).json({ token });
+    res.status(200).json({
+      token,
+      user: { email: user.email, role: user.isAdmin ? 'admin' : 'user' } // Include user info
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
