@@ -1,26 +1,29 @@
 import User from '../models/User.js';
-import bcrypt from 'bcryptjs';
-import generateToken from '../utils/generateToken.js';
 
-export const registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
-
-  const userExists = await User.findOne({ email });
-  if (userExists) {
-    return res.status(400).json({ message: 'User already exists' });
-  }
-
-  const user = new User({
-    name,
-    email,
-    password: bcrypt.hashSync(password, 10),
-  });
-
+// Get all users (admin)
+export const getUsers = async (req, res) => {
   try {
-    await user.save();
-    res.status(201).json({ name: user.name, email: user.email, token: generateToken(user._id) });
+    const users = await User.find({});
+    res.json(users);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating user' });
+    res.status(500).json({ message: 'Error fetching users' });
+  }
+};
+
+// Update user role (admin)
+export const updateUserRole = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.isAdmin = req.body.isAdmin !== undefined ? req.body.isAdmin : user.isAdmin;
+
+    const updatedUser = await user.save();
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating user role' });
   }
 };
 
