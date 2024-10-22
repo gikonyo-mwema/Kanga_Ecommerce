@@ -1,25 +1,51 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import productService from '../../services/productService';
 
-const initialState = {
-  products: [],
-  loading: false,
-  error: null,
-};
-
-// Async action to fetch products
+// Async actions for products
 export const fetchProducts = createAsyncThunk('products/fetchProducts', async (_, thunkAPI) => {
   try {
     const response = await productService.getAllProducts();
-    return response; // Ensure this is an array
+    return response;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data);
   }
 });
 
+export const createProduct = createAsyncThunk('products/createProduct', async (productData, thunkAPI) => {
+  try {
+    const response = await productService.createProduct(productData);
+    return response;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.response.data);
+  }
+});
+
+export const updateProduct = createAsyncThunk('products/updateProduct', async ({ productId, productData }, thunkAPI) => {
+  try {
+    const response = await productService.updateProduct(productId, productData);
+    return response;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.response.data);
+  }
+});
+
+export const deleteProduct = createAsyncThunk('products/deleteProduct', async (productId, thunkAPI) => {
+  try {
+    const response = await productService.deleteProduct(productId);
+    return response;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.response.data);
+  }
+});
+
+// Product slice
 const productSlice = createSlice({
   name: 'products',
-  initialState,
+  initialState: {
+    products: [],
+    loading: false,
+    error: null,
+  },
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -29,13 +55,26 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload; // Ensure this is an array
+        state.products = action.payload;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(createProduct.fulfilled, (state, action) => {
+        state.products.push(action.payload);
+      })
+      .addCase(updateProduct.fulfilled, (state, action) => {
+        const index = state.products.findIndex(product => product._id === action.payload._id);
+        if (index !== -1) {
+          state.products[index] = action.payload;
+        }
+      })
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.products = state.products.filter(product => product._id !== action.payload._id);
       });
   },
 });
 
 export default productSlice.reducer;
+
