@@ -1,19 +1,29 @@
 import Order from '../models/Order.js';
 
-export const createOrder = async (req, res) => {
-  const { orderItems, totalPrice } = req.body;
-
-  const order = new Order({
-    orderItems,
-    totalPrice,
-    user: req.user._id,
-  });
-
+// Get all orders (admin)
+export const getOrders = async (req, res) => {
   try {
-    const createdOrder = await order.save();
-    res.status(201).json(createdOrder);
+    const orders = await Order.find({}).populate('user', 'name email');
+    res.json(orders);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating order' });
+    res.status(500).json({ message: 'Error fetching orders' });
+  }
+};
+
+// Update order status
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    order.status = req.body.status || order.status;
+
+    const updatedOrder = await order.save();
+    res.json(updatedOrder);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating order' });
   }
 };
 
