@@ -10,7 +10,8 @@ const orderSchema = mongoose.Schema({
     },
   ],
   totalPrice: { type: Number, required: true },
-});
+  status: { type: String, default: 'Pending' },  // New field to track status
+}, { timestamps: true });
 
 const Order = mongoose.model('Order', orderSchema);
 export default Order;
