@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import ImageUpload from '../components/ImageUpload';
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
 const AdminDashboard = () => {
-  const [imageUrl, setImageUrl] = useState(''); // State to hold uploaded image URL
+  const [imageUrl, setImageUrl] = useState('');
 
   const handleImageUpload = (url) => {
-    setImageUrl(url); // Update state with the uploaded image URL
+    setImageUrl(url);
   };
 
   return (
@@ -15,17 +16,23 @@ const AdminDashboard = () => {
       <div className="admin-actions grid grid-cols-3 gap-6 mt-8">
         <div className="bg-gray-100 p-6 rounded text-center">
           <h2 className="text-xl font-bold">Manage Products</h2>
-          <button className="bg-blue-500 text-white py-2 px-4 mt-4">Go</button>
+          <Link to="/admin/manage-products">
+            <button className="bg-blue-500 text-white py-2 px-4 mt-4">Go</button>
+          </Link>
         </div>
 
         <div className="bg-gray-100 p-6 rounded text-center">
           <h2 className="text-xl font-bold">Manage Orders</h2>
-          <button className="bg-blue-500 text-white py-2 px-4 mt-4">Go</button>
+          <Link to="/admin/manage-orders">
+            <button className="bg-blue-500 text-white py-2 px-4 mt-4">Go</button>
+          </Link>
         </div>
 
         <div className="bg-gray-100 p-6 rounded text-center">
           <h2 className="text-xl font-bold">Manage Users</h2>
-          <button className="bg-blue-500 text-white py-2 px-4 mt-4">Go</button>
+          <Link to="/admin/manage-users">
+            <button className="bg-blue-500 text-white py-2 px-4 mt-4">Go</button>
+          </Link>
         </div>
       </div>
 
@@ -45,3 +52,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
