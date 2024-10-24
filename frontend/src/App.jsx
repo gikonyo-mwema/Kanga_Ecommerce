@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import { ToastContainer } from 'react-toastify';
 
 function App() {
   return (
