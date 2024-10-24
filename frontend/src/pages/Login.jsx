@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { loginUser } from '../redux/slices/authSlice'; // Action to log in
 
 const Login = () => {
@@ -24,28 +24,43 @@ const Login = () => {
   }, [user, navigate]);
 
   return (
-    <div className="login-page">
-      <h1 className="text-2xl font-bold text-center mt-6">Login</h1>
-
+    <div className="mx-auto w-full max-w-md space-y-6">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          Sign in to your account
+        </h1>
+        <p className="mt-2">
+          Don't have an account? 
+          <Link
+            className="font-medium ml-2 text-primary hover:underline"
+            to="/register"
+          >
+            Register
+          </Link>
+        </p>
+      </div>
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
-
-      <form onSubmit={handleSubmit} className="login-form mt-6 max-w-md mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border mb-4"
+          className="w-full p-2 border rounded-md"
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 border mb-4"
+          className="w-full p-2 border rounded-md"
         />
-        <button type="submit" className="w-full bg-blue-500 text-white py-2" disabled={loading}>
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white py-2 rounded-md"
+          disabled={loading}
+        >
           Login
         </button>
       </form>
@@ -54,4 +69,5 @@ const Login = () => {
 };
 
 export default Login;
+
 
