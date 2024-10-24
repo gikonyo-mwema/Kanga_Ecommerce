@@ -14,17 +14,21 @@ const getProductById = async (productId) => {
   return response.data;
 };
 
+
 // Create a new product (for admin)
 const createProduct = async (productData) => {
-  const response = await axios.post(API_URL, productData);
+  const response = await axios.post(API_URL, productData);  // Ensure productData contains image URL
   return response.data;
 };
 
 // Update an existing product (for admin)
 const updateProduct = async (productId, productData) => {
-  const response = await axios.put(API_URL + productId, productData);
+  const response = await axios.put(API_URL + productId, productData);  // Ensure productData contains image URL
   return response.data;
 };
+
+
+
 
 // Delete a product (for admin)
 const deleteProduct = async (productId) => {
