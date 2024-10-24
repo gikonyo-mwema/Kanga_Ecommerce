@@ -1,7 +1,9 @@
+// Register.jsx
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../redux/slices/authSlice'; // Action to register
+import { registerUser } from '../redux/slices/authSlice';
+import { toast } from 'react-toastify'; // Example of adding toast notifications
 
 const Register = () => {
   const [email, setEmail] = useState('');
@@ -9,7 +11,6 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
   const { isSuccess, loading, error } = useSelector((state) => state.auth);
 
   const handleSubmit = (e) => {
@@ -17,24 +18,27 @@ const Register = () => {
     if (password === confirmPassword) {
       dispatch(registerUser({ email, password }));
     } else {
-      alert('Passwords do not match');
+      toast.error('Passwords do not match');
     }
   };
 
-  // Redirect to login page on successful registration
   useEffect(() => {
     if (isSuccess) {
       navigate('/login');
+      toast.success('Registered successfully!');
     }
   }, [isSuccess, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   return (
     <div className="register-page">
       <h1 className="text-2xl font-bold text-center mt-6">Register</h1>
-
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-
+      {loading && <div className="spinner">Loading...</div>}
       <form onSubmit={handleSubmit} className="register-form mt-6 max-w-md mx-auto">
         <input
           type="email"
@@ -66,3 +70,6 @@ const Register = () => {
 };
 
 export default Register;
+
+
+
