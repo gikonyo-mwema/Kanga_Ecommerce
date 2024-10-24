@@ -2,20 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../redux/slices/productSlice';
 import ProductCard from '../components/ProductCard';
+import ImageUpload from '../components/ImageUpload';  // Import your image upload component
 
 const ManageProducts = () => {
   const dispatch = useDispatch();
   const { products, loading } = useSelector((state) => state.products);
 
   const [newProduct, setNewProduct] = useState({ name: '', price: '', image: '' });
+  const [imageUrl, setImageUrl] = useState('');  // New state to store the uploaded image URL
 
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
   const handleCreate = () => {
-    dispatch(createProduct(newProduct));
+    // Pass image URL from the upload component into the new product
+    dispatch(createProduct({ ...newProduct, image: imageUrl }));
     setNewProduct({ name: '', price: '', image: '' });
+    setImageUrl('');  // Clear the image URL after creating the product
   };
 
   const handleUpdate = (id, updatedProduct) => {
@@ -45,12 +49,10 @@ const ManageProducts = () => {
           value={newProduct.price}
           onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
         />
-        <input
-          type="text"
-          placeholder="Image URL"
-          value={newProduct.image}
-          onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
-        />
+        
+        {/* Image upload section */}
+        <ImageUpload setUploadedUrl={setImageUrl} />  {/* This allows the image URL to be set when uploaded */}
+        
         <button onClick={handleCreate} className="bg-green-500 text-white py-2 px-4 mt-4">
           Add Product
         </button>
