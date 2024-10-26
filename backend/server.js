@@ -4,67 +4,87 @@ import connectDB from './config/db.js';
 import productRoutes from './routes/productRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
-import authRoutes from './routes/authRoutes.js'; // Import auth routes
+import authRoutes from './routes/authRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
-import multer from 'multer'; // Import multer for handling file uploads
-import cloudinary from 'cloudinary'; // Import Cloudinary
-import { protect } from './middleware/authMiddleware.js'; // Import JWT middleware
-import { admin } from './middleware/roleMiddleware.js'; // Import role-based middleware
+import multer from 'multer';
+import cloudinary from 'cloudinary';
+import { protect } from './middleware/authMiddleware.js';
+import { admin } from './middleware/roleMiddleware.js';
 
+// Load environment variables
 dotenv.config();
 
-// Configure Cloudinary
+// Validate essential environment variables
+const requiredEnvVars = ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET', 'MONGO_URI', 'JWT_SECRET'];
+requiredEnvVars.forEach((envVar) => {
+    if (!process.env[envVar]) {
+        console.error(`Error: Missing required environment variable ${envVar}`);
+        process.exit(1);
+    }
+});
+
+// Connect to MongoDB
+(async () => {
+    try {
+        await connectDB();
+        console.log('MongoDB connected successfully');
+    } catch (error) {
+        console.error('MongoDB connection error:', error.message);
+        process.exit(1);
+    }
+})();
+
+// Initialize Cloudinary
 cloudinary.v2.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, // Use environment variables for security
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-connectDB();
-
 const app = express();
-app.use(express.json()); // To parse incoming JSON requests
+app.use(express.json());
 
-// File upload handling using multer
-const upload = multer({ storage: multer.memoryStorage() }); // Store files in memory
+// Configure multer for image uploads
+const upload = multer({ storage: multer.memoryStorage() });
 
-// Upload route for images
-app.post('/api/upload', upload.single('image'), async (req, res) => {
-    try {
-        const result = await cloudinary.v2.uploader.upload_stream(
-            { resource_type: 'image' },
-            (error, result) => {
-                if (error) return res.status(500).send(error);
-                res.json({ url: result.secure_url }); // Send back the image URL
+// Route for uploading images to Cloudinary
+app.post('/api/upload', protect, upload.single('image'), (req, res) => {
+    const uploadStream = cloudinary.v2.uploader.upload_stream(
+        { resource_type: 'image' },
+        (error, result) => {
+            if (error) {
+                console.error('Cloudinary upload error:', error.message);
+                return res.status(500).json({ message: 'Failed to upload image' });
             }
-        ).end(req.file.buffer);
-    } catch (error) {
-        res.status(500).send(error);
-    }
+            res.json({ url: result.secure_url });
+        }
+    );
+    req.file && uploadStream.end(req.file.buffer);
 });
 
-// A protected route to test authentication
+// Protected route to test user authentication
 app.get('/api/protected', protect, (req, res) => {
     res.json({ message: `Hello ${req.user.name}, you are authenticated!` });
 });
 
-// Route setup
-app.use('/api/products', productRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/auth', authRoutes); // Add authentication routes
-app.use('/api/cart', cartRoutes); // Add cart routes
-
-// Protecting a specific route (example of admin dashboard)
+// Admin route, protected by both auth and admin checks
 app.use('/api/admin', protect, admin, (req, res) => {
     res.send('Admin Dashboard');
 });
 
-// Middleware to handle errors and 404
+// API routes
+app.use('/api/products', productRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/cart', cartRoutes);
+
+// Error handling middlewares
 app.use(notFound);
 app.use(errorHandler);
 
+// Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
