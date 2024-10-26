@@ -1,16 +1,33 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import orderService from '../../services/orderService';
+import orderService from '../../services/orderService'; // Assume you have created services for orders
 
-// Async actions for orders
-export const fetchOrders = createAsyncThunk('orders/fetchOrders', async (_, thunkAPI) => {
+const initialState = {
+  orders: [],
+  loading: false,
+  error: null,
+};
+
+// Async action to place a new order
+export const placeOrder = createAsyncThunk('orders/placeOrder', async (orderData, thunkAPI) => {
   try {
-    const response = await orderService.getAllOrders();
+    const response = await orderService.placeOrder(orderData);
     return response;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data);
   }
 });
 
+// Async action to fetch order history for a user
+export const fetchOrderHistory = createAsyncThunk('orders/fetchOrderHistory', async (_, thunkAPI) => {
+  try {
+    const response = await orderService.getOrderHistory();
+    return response;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.response.data);
+  }
+});
+
+// Async action to update order status (for admins)
 export const updateOrderStatus = createAsyncThunk('orders/updateOrderStatus', async ({ orderId, status }, thunkAPI) => {
   try {
     const response = await orderService.updateOrderStatus(orderId, status);
@@ -20,37 +37,60 @@ export const updateOrderStatus = createAsyncThunk('orders/updateOrderStatus', as
   }
 });
 
-// Order slice
 const orderSlice = createSlice({
   name: 'orders',
-  initialState: {
-    orders: [],
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchOrders.pending, (state) => {
+      // Place Order
+      .addCase(placeOrder.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchOrders.fulfilled, (state, action) => {
+      .addCase(placeOrder.fulfilled, (state, action) => {
         state.loading = false;
-        state.orders = action.payload;
+        state.orders.push(action.payload);
       })
-      .addCase(fetchOrders.rejected, (state, action) => {
+      .addCase(placeOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+
+      // Fetch Order History
+      .addCase(fetchOrderHistory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchOrderHistory.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders = action.payload;
+      })
+      .addCase(fetchOrderHistory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Update Order Status (Admin)
+      .addCase(updateOrderStatus.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
-        const index = state.orders.findIndex(order => order._id === action.payload._id);
+        state.loading = false;
+        const updatedOrder = action.payload;
+        const index = state.orders.findIndex((order) => order._id === updatedOrder._id);
         if (index !== -1) {
-          state.orders[index].status = action.payload.status;
+          state.orders[index] = updatedOrder;
         }
+      })
+      .addCase(updateOrderStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
 export default orderSlice.reducer;
+
 
