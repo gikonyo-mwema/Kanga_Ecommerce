@@ -5,7 +5,7 @@ import ProductCard from '../components/ProductCard';
 
 const Products = () => {
   const dispatch = useDispatch();
-  
+
   // Accessing products and loading/error states from Redux store
   const products = useSelector(state => state.products.products);
   const loading = useSelector(state => state.products.loading);
@@ -15,6 +15,9 @@ const Products = () => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
+  // Debugging: Check the value of products
+  console.log("Products from Redux:", products);
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -23,7 +26,7 @@ const Products = () => {
       <h1 className="text-2xl font-bold text-center mt-6">Our Products</h1>
 
       <div className="grid grid-cols-4 gap-6 mt-8">
-        {products.length > 0 ? (
+        {Array.isArray(products) && products.length > 0 ? (
           products.map(product => (
             <ProductCard key={product._id} product={product} />
           ))
@@ -36,3 +39,4 @@ const Products = () => {
 };
 
 export default Products;
+
