@@ -5,6 +5,7 @@ const initialState = {
   user: null,
   loading: false,
   error: null,
+  isSuccess: false, // Added for registration success tracking
 };
 
 // Async action to handle login
@@ -20,7 +21,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (userData, thu
 // Async action to handle registration
 export const registerUser = createAsyncThunk('auth/registerUser', async (userData, thunkAPI) => {
   try {
-    const response = await authService.register(userData); // Ensure you have a register function in authService
+    const response = await authService.register(userData);
     return response;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data);
@@ -33,6 +34,7 @@ const authSlice = createSlice({
   reducers: {
     logout(state) {
       state.user = null;
+      state.isSuccess = false; // Reset on logout
     },
   },
   extraReducers: (builder) => {
@@ -53,16 +55,17 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.loading = false;
-        // Handle successful registration if needed
+        state.isSuccess = true; // Set success flag on successful registration
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload; // Handle registration error
+        state.error = action.payload;
       });
   },
 });
 
 export const { logout } = authSlice.actions;
 export default authSlice.reducer;
+
