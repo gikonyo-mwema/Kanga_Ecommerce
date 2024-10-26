@@ -2,9 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { ShoppingCart, LogOut } from 'lucide-react';
-import { logoutUser } from '../redux/slices/authSlice';
-//import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
-//import { Avatar, AvatarFallback } from '../ui/avatar';
+import { logout } from '../redux/slices/authSlice';  // <-- Corrected import
 
 const Navbar = () => {
   const location = useLocation();
@@ -19,7 +17,7 @@ const Navbar = () => {
   }
 
   const handleLogout = () => {
-    dispatch(logoutUser());
+    dispatch(logout());  // <-- Corrected action
   };
 
   return (
