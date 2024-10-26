@@ -6,14 +6,30 @@ import { loginUser } from '../redux/slices/authSlice'; // Action to log in
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [formError, setFormError] = useState(''); // New state for form validation
   const dispatch = useDispatch();
   const navigate = useNavigate();
   
   const { user, loading, error } = useSelector((state) => state.auth);
 
+  const validateForm = () => {
+    if (!email || !password) {
+      setFormError('Please fill in both fields.');
+      return false;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setFormError('Please enter a valid email.');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(loginUser({ email, password }));
+    if (validateForm()) {
+      setFormError('');
+      dispatch(loginUser({ email, password }));
+    }
   };
 
   // Redirect to home page on successful login
@@ -40,6 +56,7 @@ const Login = () => {
         </p>
       </div>
       {loading && <p>Loading...</p>}
+      {formError && <p className="text-red-500">{formError}</p>}
       {error && <p className="text-red-500">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
@@ -69,5 +86,6 @@ const Login = () => {
 };
 
 export default Login;
+
 
 
