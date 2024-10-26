@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ImageUpload from '../components/ImageUpload';
-import { Link } from 'react-router-dom'; // Import Link for navigation
+import { Link, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux'; // Import Redux hook
 
 const AdminDashboard = () => {
   const [imageUrl, setImageUrl] = useState('');
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth); // Fetch the user from Redux state
 
   const handleImageUpload = (url) => {
     setImageUrl(url);
   };
+
+  useEffect(() => {
+    // Redirect if the user is not an admin
+    if (!user || user.role !== 'admin') {
+      navigate('/'); // Redirect non-admins to the homepage or login
+    }
+  }, [user, navigate]);
 
   return (
     <div className="admin-dashboard">
@@ -52,4 +62,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
 
