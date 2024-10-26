@@ -2,22 +2,30 @@ import axios from 'axios';
 
 const API_URL = '/api/orders/';
 
-// Fetch all orders
-const getAllOrders = async () => {
-  const response = await axios.get(API_URL);
+// Place a new order
+const placeOrder = async (orderData) => {
+  const response = await axios.post(API_URL, orderData);
   return response.data;
 };
 
-// Update order status
+// Get the order history for a user
+const getOrderHistory = async () => {
+  const response = await axios.get(`${API_URL}history`);
+  return response.data;
+};
+
+// Update order status (for admins)
 const updateOrderStatus = async (orderId, status) => {
-  const response = await axios.put(API_URL + orderId, { status });
+  const response = await axios.put(`${API_URL}${orderId}/status`, { status });
   return response.data;
 };
 
 const orderService = {
-  getAllOrders,
+  placeOrder,
+  getOrderHistory,
   updateOrderStatus,
 };
 
 export default orderService;
+
 
