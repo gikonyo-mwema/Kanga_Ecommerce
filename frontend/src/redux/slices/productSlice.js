@@ -55,7 +55,8 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        console.log("Fetched Products Payload:", action.payload); // Debugging the payload
+        state.products = action.payload; // Ensure this is an array
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
@@ -77,4 +78,5 @@ const productSlice = createSlice({
 });
 
 export default productSlice.reducer;
+
 
