@@ -1,14 +1,15 @@
 import Product from '../models/Product.js';
 import cloudinary from '../config/cloudinaryConfig.js';
-import fs from 'fs';  // For file system operations, to delete local temp images after upload
+import fs from 'fs';
 
 // Get all products
 export const getProducts = async (req, res) => {
   try {
     const products = await Product.find({});
-    res.json(products);
+    res.status(200).json(products);
   } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
+    console.error('Error fetching products:', error.message);
+    res.status(500).json({ message: 'Server error while fetching products' });
   }
 };
 
@@ -17,23 +18,27 @@ export const createProduct = async (req, res) => {
   const { name, price, description, countInStock } = req.body;
 
   try {
-    // Upload image to Cloudinary
     const result = await cloudinary.uploader.upload(req.file.path);
-    
-    // Delete the local image after upload to Cloudinary
-    fs.unlinkSync(req.file.path);
+    if (!result || !result.secure_url) {
+      throw new Error('Image upload to Cloudinary failed');
+    }
+
+    fs.unlink(req.file.path, (err) => {
+      if (err) console.error('Failed to delete local file:', err.message);
+    });
 
     const newProduct = new Product({
       name,
       price,
       description,
-      imageUrl: result.secure_url,  // Cloudinary URL
+      imageUrl: result.secure_url,
       countInStock
     });
 
     const savedProduct = await newProduct.save();
     res.status(201).json(savedProduct);
   } catch (error) {
+    console.error('Error creating product:', error.message);
     res.status(500).json({ message: 'Error creating product' });
   }
 };
@@ -48,12 +53,16 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    // If an image is uploaded, replace the existing one
     let imageUrl = product.imageUrl;
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path);
+      if (!result || !result.secure_url) {
+        throw new Error('Image upload to Cloudinary failed');
+      }
       imageUrl = result.secure_url;
-      fs.unlinkSync(req.file.path);  // Remove local temp file
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error('Failed to delete local file:', err.message);
+      });
     }
 
     product.name = name || product.name;
@@ -63,8 +72,9 @@ export const updateProduct = async (req, res) => {
     product.countInStock = countInStock || product.countInStock;
 
     const updatedProduct = await product.save();
-    res.json(updatedProduct);
+    res.status(200).json(updatedProduct);
   } catch (error) {
+    console.error('Error updating product:', error.message);
     res.status(500).json({ message: 'Error updating product' });
   }
 };
@@ -78,10 +88,10 @@ export const deleteProduct = async (req, res) => {
     }
 
     await product.remove();
-    res.json({ message: 'Product removed' });
+    res.status(200).json({ message: 'Product removed' });
   } catch (error) {
+    console.error('Error deleting product:', error.message);
     res.status(500).json({ message: 'Error deleting product' });
   }
 };
-
 
